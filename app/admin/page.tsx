@@ -39,6 +39,8 @@ function Admin({ pin, onLocked }: { pin: string; onLocked: () => void }) {
   const [newNames, setNewNames] = useState("");
   const [adding, setAdding] = useState(false);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState("");
 
   const handleError = useCallback(
     (err: unknown) => {
@@ -120,6 +122,22 @@ function Admin({ pin, onLocked }: { pin: string; onLocked: () => void }) {
     }
   }
 
+  function startEdit(guest: Guest) {
+    setEditingId(guest.id);
+    setEditName(guest.name);
+  }
+
+  async function saveEdit(e: FormEvent, guest: Guest) {
+    e.preventDefault();
+    const name = editName.trim();
+    if (!name || name === guest.name) {
+      setEditingId(null);
+      return;
+    }
+    await run(guest, "rename", { name });
+    setEditingId(null);
+  }
+
   function remove(guest: Guest) {
     if (window.confirm(`¿Eliminar a ${guest.name} de la lista?`)) run(guest, "remove");
   }
@@ -199,7 +217,28 @@ function Admin({ pin, onLocked }: { pin: string; onLocked: () => void }) {
               className={`flex flex-wrap items-center gap-3 p-3 ${busyId === g.id ? "opacity-50" : ""}`}
             >
               <div className="min-w-0 flex-1">
-                <p className="font-semibold">{g.name}</p>
+                {editingId === g.id ? (
+                  <form onSubmit={(e) => saveEdit(e, g)} className="flex flex-wrap gap-2">
+                    <input
+                      autoFocus
+                      className="min-w-0 flex-1 rounded-lg border p-2"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                    />
+                    <button className="rounded-lg bg-foreground px-3 py-2 text-sm text-background">
+                      Guardar
+                    </button>
+                    <button
+                      type="button"
+                      className="rounded-lg border px-3 py-2 text-sm"
+                      onClick={() => setEditingId(null)}
+                    >
+                      Cancelar
+                    </button>
+                  </form>
+                ) : (
+                  <p className="font-semibold">{g.name}</p>
+                )}
                 <p className="text-sm opacity-70">
                   {g.checked_in_at
                     ? `Entró ${formatTime(g.checked_in_at)} · ${1 + g.companions} ${g.companions === 0 ? "persona" : "personas"}`
@@ -232,6 +271,16 @@ function Admin({ pin, onLocked }: { pin: string; onLocked: () => void }) {
                     Deshacer
                   </button>
                 </div>
+              )}
+
+              {editingId !== g.id && (
+                <button
+                  className="rounded-lg border px-3 py-2 text-sm"
+                  disabled={busyId === g.id}
+                  onClick={() => startEdit(g)}
+                >
+                  Editar
+                </button>
               )}
 
               <button

@@ -7,6 +7,7 @@ type Body = {
   id?: string;
   companions?: number;
   names?: string[];
+  name?: string;
 };
 
 const FIELDS = "id, name, companions, checked_in_at";
@@ -89,6 +90,14 @@ export async function POST(req: Request) {
       const { error } = await guests.delete().eq("id", body.id);
       if (error) return fail("server", 500);
       return Response.json({ ok: true });
+    }
+
+    case "rename": {
+      const name = (body.name ?? "").replace(/\s+/g, " ").trim().toUpperCase();
+      if (!body.id || !name) return fail("bad_request");
+      const { data, error } = await guests.update({ name }).eq("id", body.id).select(FIELDS);
+      if (error) return fail("server", 500);
+      return Response.json({ guest: data?.[0] });
     }
 
     case "undo": {

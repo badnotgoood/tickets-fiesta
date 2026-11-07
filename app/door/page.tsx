@@ -18,7 +18,7 @@ export default function DoorPage() {
   if (!pin) {
     return (
       <PinGate
-        title="Entrada"
+        title="Puerta"
         onUnlock={setPin}
       />
     );
@@ -137,10 +137,10 @@ function Door({ pin, onLocked }: { pin: string; onLocked: () => void }) {
   return (
     <main className="door flex min-h-dvh flex-col gap-4 p-4">
       <header className="door-header flex items-baseline justify-between">
-        <h1 className="text-xl font-bold">Entrada</h1>
+        <h1 className="text-2xl font-bold">Puerta</h1>
         <div className="text-right">
-          <p className="door-count text-3xl font-extrabold">{totals.inside}</p>
-          <p className="text-sm opacity-70">personas dentro</p>
+          <p className="door-count text-5xl font-extrabold">{totals.inside}</p>
+          <p className="text-base opacity-70">Personas dentro</p>
         </div>
       </header>
 
@@ -184,17 +184,6 @@ function Door({ pin, onLocked }: { pin: string; onLocked: () => void }) {
                   +
                 </button>
               </div>
-              <div className="door-quick grid grid-cols-6 gap-2">
-                {[0, 1, 2, 3, 4, 5].map((n) => (
-                  <button
-                    key={n}
-                    onClick={() => setCompanions(n)}
-                    className={`rounded-lg border p-3 text-lg ${companions === n ? "bg-foreground text-background" : ""}`}
-                  >
-                    {n}
-                  </button>
-                ))}
-              </div>
               <button
                 onClick={checkIn}
                 disabled={busy}
@@ -202,7 +191,9 @@ function Door({ pin, onLocked }: { pin: string; onLocked: () => void }) {
               >
                 {busy
                   ? "Guardando…"
-                  : `Entró · ${1 + companions} ${companions === 0 ? "persona" : "personas"}`}
+                  : companions === 0
+                    ? "Entró"
+                    : `Entró + ${companions} ${companions === 1 ? "persona" : "personas"}`}
               </button>
             </>
           )}
@@ -216,7 +207,7 @@ function Door({ pin, onLocked }: { pin: string; onLocked: () => void }) {
             type="search"
             autoComplete="off"
             autoCorrect="off"
-            placeholder="Buscar nombre…"
+            placeholder="Buscar nombre"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -224,8 +215,8 @@ function Door({ pin, onLocked }: { pin: string; onLocked: () => void }) {
           {!loaded && <p className="opacity-70">Cargando lista…</p>}
 
           {loaded && query.trim().length >= 2 && results.length === 0 && (
-            <div className="door-missing rounded-xl bg-red-600 p-5 text-white">
-              <p className="text-2xl font-extrabold">NO ESTÁ EN LA LISTA</p>
+            <div className="door-missing rounded-xl border p-5 text-center opacity-70">
+              <p className="text-xl font-semibold">No está en la lista</p>
               <p>Prueba con otro nombre o apellido</p>
             </div>
           )}
