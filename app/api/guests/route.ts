@@ -38,7 +38,12 @@ export async function POST(req: Request) {
   const role = roleFor(body.pin);
   if (!role) return fail("unauthorized", 401);
 
-  const guests = db().from("guests");
+  let guests;
+  try {
+    guests = db().from("guests");
+  } catch (err) {
+    return Response.json({ error: "config", detail: String(err) }, { status: 500 });
+  }
 
   switch (body.action) {
     case "login":
@@ -46,7 +51,7 @@ export async function POST(req: Request) {
 
     case "list": {
       const { data, error } = await guests.select(FIELDS).order("name");
-      if (error) return fail("server", 500);
+      if (error) return Response.json({ error: "db", detail: error.message }, { status: 500 });
       return Response.json({ guests: data });
     }
 

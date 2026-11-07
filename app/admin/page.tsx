@@ -43,6 +43,7 @@ function Admin({ pin, onLocked }: { pin: string; onLocked: () => void }) {
   const handleError = useCallback(
     (err: unknown) => {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) onLocked();
+      else if (err instanceof ApiError && err.data.detail) setError(`Error: ${String(err.data.detail)}`);
       else setError("No se pudo guardar. Revisa la conexión.");
     },
     [onLocked],
